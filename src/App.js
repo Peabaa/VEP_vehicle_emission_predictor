@@ -1,10 +1,10 @@
 import './App.css';
-import Start from './components/StartPage/Start.jsx'
+import VEP from './components/StartPage/VEP.jsx'
 
 function App() {
   return (
     <>
-      <Start/>
+      <VEP/>
     </>
   );
 }
