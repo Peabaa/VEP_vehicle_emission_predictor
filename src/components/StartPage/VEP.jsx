@@ -7,7 +7,7 @@ const VEP = () => {
   
   const [isStartScreen, setIsStartScreen] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);  // Pop-up Window for Data Table
-  const [isVehicleTypeSelected, setIsVehicleTypeSelected] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [vehicleType, setVehicleType] = useState("");
   const [fuelType, setFuelType] = useState("");
   const [engineType, setEngineType] = useState("");
@@ -31,12 +31,10 @@ const VEP = () => {
 
       setSubmittedData(prevData => [...prevData, newData]);
 
-      setFuelType("");
-      setEngineType("");
-      setFuelEfficiency("");
       setMileage("");
 
-      setIsVehicleTypeSelected(true);
+      setIsFormSubmitted(true);
+
     } else {
       alert("Please fill in all fields before submitting!");
     }
@@ -44,8 +42,12 @@ const VEP = () => {
 
   const handleClearData = () => {
     setSubmittedData([]); 
-    setIsVehicleTypeSelected(false); 
+    setIsFormSubmitted(false);
     setVehicleType(""); 
+    setFuelType("");
+    setEngineType("");
+    setFuelEfficiency("");
+    setMileage("");
   };
 
   const openModal = () => {
@@ -57,7 +59,7 @@ const VEP = () => {
   };
 
   const handleVehicleTypeChange = (e) => {
-    if (!isVehicleTypeSelected) {
+    if (!isFormSubmitted) {
       setVehicleType(e.target.value);
     }
   };
@@ -89,7 +91,7 @@ const VEP = () => {
               <label>Vehicle Type</label>
               <select value={vehicleType}
                 onChange={handleVehicleTypeChange}
-                disabled={isVehicleTypeSelected}
+                disabled={isFormSubmitted}
               >
               <option value="" disabled hidden>Select Vehicle Type</option>
               <option value="Motorcycle">Motorcycle</option>
@@ -103,7 +105,10 @@ const VEP = () => {
             </div>
             <div className="info-item">
             <label>Fuel Type</label>
-              <select value={fuelType} onChange={(e) => setFuelType(e.target.value)}>
+              <select value={fuelType}
+                onChange={(e) => setFuelType(e.target.value)}
+                disabled={isFormSubmitted}
+              >
               <option value="" disabled hidden>Select Fuel Type</option>
               <option value="Diesel">Diesel</option>
               <option value="Gasoline">Gasoline</option>
@@ -116,6 +121,7 @@ const VEP = () => {
                 value={engineType} 
                 onChange={(e) => setEngineType(e.target.value)} 
                 placeholder="Enter Engine Type" 
+                disabled={isFormSubmitted}
               />
             </div>
             <div className="info-item">
@@ -125,6 +131,7 @@ const VEP = () => {
                 value={fuelEfficiency} 
                 onChange={(e) => setFuelEfficiency(e.target.value)} 
                 placeholder="Enter Fuel Efficiency (km/liters)" 
+                disabled={isFormSubmitted}
               />
             </div>
             <div className="info-item">

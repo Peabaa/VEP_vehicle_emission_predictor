@@ -208,6 +208,11 @@ input::placeholder {
   font-style: normal;
 }
 
+input:disabled, select:disabled {
+  background-color: #e0e0e0; 
+  color: #888888; 
+}
+
 .menu{
   position: relative;
   width: 850px;  
