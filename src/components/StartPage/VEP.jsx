@@ -7,14 +7,45 @@ const VEP = () => {
   
   const [isStartScreen, setIsStartScreen] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);  // Pop-up Window for Data Table
+  const [isVehicleTypeSelected, setIsVehicleTypeSelected] = useState(false);
   const [vehicleType, setVehicleType] = useState("");
   const [fuelType, setFuelType] = useState("");
   const [engineType, setEngineType] = useState("");
   const [fuelEfficiency, setFuelEfficiency] = useState("");
   const [mileage, setMileage] = useState("");
+  const [submittedData, setSubmittedData] = useState([]);
 
   const handleStartClick  = () => {
     setIsStartScreen(false);
+  };
+
+  const handleSubmit = () => {
+    if (vehicleType && fuelType && engineType && fuelEfficiency && mileage) {
+      const newData = {
+        vehicleType,
+        fuelType,
+        engineType,
+        fuelEfficiency,
+        mileage
+      };
+
+      setSubmittedData(prevData => [...prevData, newData]);
+
+      setFuelType("");
+      setEngineType("");
+      setFuelEfficiency("");
+      setMileage("");
+
+      setIsVehicleTypeSelected(true);
+    } else {
+      alert("Please fill in all fields before submitting!");
+    }
+  };
+
+  const handleClearData = () => {
+    setSubmittedData([]); 
+    setIsVehicleTypeSelected(false); 
+    setVehicleType(""); 
   };
 
   const openModal = () => {
@@ -23,6 +54,12 @@ const VEP = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleVehicleTypeChange = (e) => {
+    if (!isVehicleTypeSelected) {
+      setVehicleType(e.target.value);
+    }
   };
 
   return (
@@ -50,23 +87,25 @@ const VEP = () => {
           <div className="info-container">
             <div className="info-item">
               <label>Vehicle Type</label>
-              <select value={vehicleType} onChange={(e) => setVehicleType(e.target.value)}>
+              <select value={vehicleType}
+                onChange={handleVehicleTypeChange}
+                disabled={isVehicleTypeSelected}
+              >
               <option value="" disabled hidden>Select Vehicle Type</option>
-              <option value="motorcycle">Motorcycle</option>
-              <option value="sedan">Sedan</option>
-              <option value="hatchback">Hatchback</option>
-              <option value="suv">SUV</option>
-              <option value="van">Van</option>
-              <option value="pickup">Pickup Truck</option>
-              <option value="truck_4">Truck - 4 Wheeler</option>
-              <option value="truck_6">Truck - 6 Wheeler</option>
+              <option value="Motorcycle">Motorcycle</option>
+              <option value="Sedan">Sedan</option>
+              <option value="Hatchback">Hatchback</option>
+              <option value="SUV">SUV</option>
+              <option value="Van">Van</option>
+              <option value="Pickup Truck">Pickup Truck</option>
+              <option value="Truck (4 Wheels and Up)">Truck (4 Wheels and Up)</option>
               </select>
             </div>
             <div className="info-item">
             <label>Fuel Type</label>
               <select value={fuelType} onChange={(e) => setFuelType(e.target.value)}>
               <option value="" disabled hidden>Select Fuel Type</option>
-              <option value="diesel">Diesel</option>
+              <option value="Diesel">Diesel</option>
               <option value="Gasoline">Gasoline</option>
               </select>
             </div>
@@ -85,7 +124,7 @@ const VEP = () => {
                 type="number" 
                 value={fuelEfficiency} 
                 onChange={(e) => setFuelEfficiency(e.target.value)} 
-                placeholder="Enter Fuel Efficiency (liters/km)" 
+                placeholder="Enter Fuel Efficiency (km/liters)" 
               />
             </div>
             <div className="info-item">
@@ -99,7 +138,10 @@ const VEP = () => {
             </div>
           </div>
           <div className="menu"></div>
-          <button className="data-button" onClick={openModal}>Data Table</button>
+          <div className="button-container">
+            <button className="submit-button" onClick={handleSubmit}>Submit</button>
+            <button className="data-button" onClick={openModal}>Data Table</button>
+          </div>
         </div>
       </div>
     )}
@@ -107,9 +149,32 @@ const VEP = () => {
     {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>Data Table</h2>
-            <p>This is where the data table will be displayed.</p>
-            <button className="close-modal" onClick={closeModal}>Close</button>
+            <table>
+                <thead>
+                  <tr>
+                    <th>Vehicle Type</th>
+                    <th>Fuel Type</th>
+                    <th>Engine Type</th>
+                    <th>Fuel Efficiency</th>
+                    <th>Mileage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {submittedData.map((data, index) => (
+                    <tr key={index}>
+                      <td>{data.vehicleType}</td>
+                      <td>{data.fuelType}</td>
+                      <td>{data.engineType}</td>
+                      <td>{data.fuelEfficiency}</td>
+                      <td>{data.mileage}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            <div className="modal-buttons">
+              <button className="clear-button" onClick={handleClearData}>Clear</button>
+              <button className="close-modal" onClick={closeModal}>Close</button>
+            </div>
           </div>
         </div>
       )}
