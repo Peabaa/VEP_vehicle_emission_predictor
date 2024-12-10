@@ -101,7 +101,7 @@ const VEP = () => {
     // Perform divided difference extrapolation
     const calculateViolationMileage = (points, limit) => {
       const n = points.length;
-      if (n < 2) return points[0].mileage; // Not enough points to extrapolate
+      if (n < 2) return points[0].mileage;
   
       // Initialize divided differences table with mileage values
       let dividedDifferences = [];
@@ -122,12 +122,12 @@ const VEP = () => {
       console.log("Divided Differences Table:", dividedDifferences);
   
       // Perform extrapolation using Newton's formula
-      let predictedMileage = dividedDifferences[0][0]; // Start with the first mileage
+      let predictedMileage = dividedDifferences[0][0]; 
       let term = 1;
   
       for (let i = 1; i < n; i++) {
-        term *= (limit - points[i - 1].coEmission); // Build the term using CO emissions
-        predictedMileage += dividedDifferences[0][i] * term; // Add the contribution of each term
+        term *= (limit - points[i - 1].coEmission); 
+        predictedMileage += dividedDifferences[0][i] * term; 
         console.log(`Term ${i}: ${term}, Predicted Mileage: ${predictedMileage}`);
       }
   
@@ -146,8 +146,8 @@ const VEP = () => {
   
     let predictedMileage = calculateViolationMileage(dataPoints, emissionLimit);
   
-    // Add a reliability threshold
-    const maxExtrapolationFactor = 2; // Allow up to 2x the mileage range
+    // Reliability Threshold
+    const maxExtrapolationFactor = 2;
     const maxAllowedMileage = dataPoints[dataPoints.length - 1].mileage * maxExtrapolationFactor;
   
     if (predictedMileage === -1 || predictedMileage < 0 || predictedMileage > maxAllowedMileage) {
@@ -247,7 +247,14 @@ const VEP = () => {
               <input 
                 type="number" 
                 value={fuelEfficiency} 
-                onChange={(e) => setFuelEfficiency(e.target.value)} 
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  if (value >= 0 || e.target.value === "") { // Allow only non-negative numbers or empty input
+                    setFuelEfficiency(e.target.value);
+                  } else {
+                    alert("Fuel Efficiency must be a positive number.");
+                  }
+                }} 
                 placeholder="Enter Fuel Efficiency (km/liters)" 
                 disabled={isFormSubmitted}
               />
@@ -257,7 +264,14 @@ const VEP = () => {
               <input 
                 type="number" 
                 value={mileage} 
-                onChange={(e) => setMileage(e.target.value)} 
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  if (value >= 0 || e.target.value === "") { // Allow only non-negative numbers or empty input
+                    setMileage(e.target.value);
+                  } else {
+                    alert("Mileage must be a positive number.");
+                  }
+                }}  
                 placeholder="Enter Mileage (km)" 
               />
             </div>
