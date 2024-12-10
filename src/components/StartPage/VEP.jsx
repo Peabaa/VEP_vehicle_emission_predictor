@@ -14,6 +14,7 @@ const VEP = () => {
   const [fuelEfficiency, setFuelEfficiency] = useState("");
   const [mileage, setMileage] = useState("");
   const [submittedData, setSubmittedData] = useState([]);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleStartClick  = () => {
     setIsStartScreen(false);
@@ -21,20 +22,39 @@ const VEP = () => {
 
   const handleSubmit = () => {
     if (vehicleType && fuelType && engineType && fuelEfficiency && mileage) {
+      const newMileage = parseFloat(mileage);
+  
+      if (submittedData.length > 0) {
+        const latestMileage = parseFloat(submittedData[submittedData.length - 1].mileage);
+        if (newMileage <= latestMileage) {
+          alert("Mileage must be greater than the latest mileage entered.");
+          return; 
+        }
+      }
+  
       const newData = {
         vehicleType,
         fuelType,
         engineType,
         fuelEfficiency,
-        mileage
+        mileage: newMileage,
       };
-
-      setSubmittedData(prevData => [...prevData, newData]);
-
+  
+      if (submittedData.length > 0) {
+        const previousData = submittedData[submittedData.length - 1];
+        const previousMileage = parseFloat(previousData.mileage);
+        const previousFuelEfficiency = parseFloat(previousData.fuelEfficiency);
+  
+        const adjustedFuelEfficiency =
+          previousFuelEfficiency * Math.pow(1 - 0.02, (newMileage - previousMileage) / 100);
+  
+        newData.fuelEfficiency = adjustedFuelEfficiency.toFixed(2);
+      }
+  
+      setSubmittedData((prevData) => [...prevData, newData]);
+  
       setMileage("");
-
       setIsFormSubmitted(true);
-
     } else {
       alert("Please fill in all fields before submitting!");
     }
@@ -42,6 +62,7 @@ const VEP = () => {
 
   const handleClearData = () => {
     setSubmittedData([]); 
+    setAlertMessage("");
     setIsFormSubmitted(false);
     setVehicleType(""); 
     setFuelType("");
@@ -49,6 +70,103 @@ const VEP = () => {
     setFuelEfficiency("");
     setMileage("");
   };
+
+  const handleCalculate = () => {
+    if (submittedData.length < 2) {
+      setAlertMessage("Please submit at least 2 data points to perform the calculation.");
+      return;
+    }
+  
+    const emissionLimit = fuelType === "Diesel" ? 0.9 : 2.0;
+  
+    // Calculate CO emission for each submitted data point
+    const dataPoints = submittedData.map((data) => {
+      const fuelConsumption = 1 / parseFloat(data.fuelEfficiency);
+      const emissionFactor = {
+        Motorcycle: 0.5,
+        Sedan: 2.9,
+        Hatchback: 1.96,
+        SUV: 3.0,
+        Van: 3.5,
+        "Pickup Truck": 5.12,
+        "Truck (4 Wheels and Up)": 6.2,
+      }[data.vehicleType] || 2.9; // Default to Sedan if no match
+  
+      const coEmission = fuelConsumption * emissionFactor;
+      return { mileage: parseFloat(data.mileage), coEmission };
+    });
+  
+    console.log("Data Points:", dataPoints);
+  
+    // Perform divided difference extrapolation
+    const calculateViolationMileage = (points, limit) => {
+      const n = points.length;
+      if (n < 2) return points[0].mileage; // Not enough points to extrapolate
+  
+      // Initialize divided differences table with mileage values
+      let dividedDifferences = [];
+      for (let i = 0; i < n; i++) {
+        dividedDifferences[i] = [points[i].mileage];
+      }
+  
+      // Compute higher-order divided differences
+      for (let i = 1; i < n; i++) {
+        for (let j = 0; j < n - i; j++) {
+          const diff =
+            (dividedDifferences[j + 1][i - 1] - dividedDifferences[j][i - 1]) /
+            (points[j + i].coEmission - points[j].coEmission);
+          dividedDifferences[j].push(diff);
+        }
+      }
+  
+      console.log("Divided Differences Table:", dividedDifferences);
+  
+      // Perform extrapolation using Newton's formula
+      let predictedMileage = dividedDifferences[0][0]; // Start with the first mileage
+      let term = 1;
+  
+      for (let i = 1; i < n; i++) {
+        term *= (limit - points[i - 1].coEmission); // Build the term using CO emissions
+        predictedMileage += dividedDifferences[0][i] * term; // Add the contribution of each term
+        console.log(`Term ${i}: ${term}, Predicted Mileage: ${predictedMileage}`);
+      }
+  
+      return isNaN(predictedMileage) || !isFinite(predictedMileage) ? -1 : predictedMileage;
+    };
+  
+    const linearExtrapolation = (points, limit) => {
+      const lastPoint = points[points.length - 1];
+      const secondLastPoint = points[points.length - 2];
+  
+      const slope = (lastPoint.coEmission - secondLastPoint.coEmission) /
+                    (lastPoint.mileage - secondLastPoint.mileage);
+  
+      return lastPoint.mileage + (limit - lastPoint.coEmission) / slope;
+    };
+  
+    let predictedMileage = calculateViolationMileage(dataPoints, emissionLimit);
+  
+    // Add a reliability threshold
+    const maxExtrapolationFactor = 2; // Allow up to 2x the mileage range
+    const maxAllowedMileage = dataPoints[dataPoints.length - 1].mileage * maxExtrapolationFactor;
+  
+    if (predictedMileage === -1 || predictedMileage < 0 || predictedMileage > maxAllowedMileage) {
+      console.log("Prediction deemed unreliable. Switching to fallback method.");
+      predictedMileage = linearExtrapolation(dataPoints, emissionLimit);
+    }
+  
+    console.log("Predicted Mileage:", predictedMileage);
+  
+    if (predictedMileage === -1) {
+      setAlertMessage("Unable to predict the mileage of violation. Please check your data.");
+    } else {
+      setAlertMessage(
+        `The predicted mileage of violation is approximately: ${predictedMileage.toFixed(
+          2
+        )} km`
+      );
+    }
+  };  
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -156,30 +274,38 @@ const VEP = () => {
     {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <table>
-                <thead>
-                  <tr>
-                    <th>Vehicle Type</th>
-                    <th>Fuel Type</th>
-                    <th>Engine Type</th>
-                    <th>Fuel Efficiency</th>
-                    <th>Mileage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {submittedData.map((data, index) => (
-                    <tr key={index}>
-                      <td>{data.vehicleType}</td>
-                      <td>{data.fuelType}</td>
-                      <td>{data.engineType}</td>
-                      <td>{data.fuelEfficiency}</td>
-                      <td>{data.mileage}</td>
+            <div className="table-content">
+              <table>
+                  <thead>
+                    <tr>
+                      <th>Vehicle Type</th>
+                      <th>Fuel Type</th>
+                      <th>Engine Type</th>
+                      <th>Fuel Efficiency</th>
+                      <th>Mileage</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {submittedData.map((data, index) => (
+                      <tr key={index}>
+                        <td>{data.vehicleType}</td>
+                        <td>{data.fuelType}</td>
+                        <td>{data.engineType}</td>
+                        <td>{data.fuelEfficiency}</td>
+                        <td>{data.mileage}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {alertMessage && (
+                <div className="alert-message">
+                  <p>{alertMessage}</p>
+                </div>
+              )}
             <div className="modal-buttons">
               <button className="clear-button" onClick={handleClearData}>Clear</button>
+              <button className="calculate-button" onClick = {handleCalculate}>Calculate</button>
               <button className="close-modal" onClick={closeModal}>Close</button>
             </div>
           </div>

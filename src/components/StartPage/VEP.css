@@ -283,9 +283,26 @@ input:disabled, select:disabled {
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+.table-content{
+  max-height: 330px;
+  overflow-y: auto; 
+  overflow-x: hidden; 
+  border: 1px solid #ddd; 
+  padding: 5px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+thead th {
+  position: sticky;
+  top: 0; 
+  background: #f4f4f4;
+  z-index: 10; 
+  text-align: left;
+  padding: 8px;
 }
 
 table th,
@@ -295,16 +312,24 @@ table td {
   text-align: center;
 }
 
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
 table th {
   background-color: #f4f4f4;
 }
 
 .modal-buttons{
   display: flex;
-  gap: 570px; 
+  gap: 300px; 
 }
 
-.clear-button, .close-modal {
+.clear-button, .calculate-button, .close-modal {
   background-color: #D9D9D9;
   padding: 4px;
   font-size: 22px;
@@ -318,8 +343,20 @@ table th {
   margin-top: auto;
 }
 
-.clear-button:hover, .close-modal:hover {
+.clear-button:hover, .calculate-button:hover, .close-modal:hover {
   background-color: #C1C1C1;
+}
+
+.alert-message {
+  background-color: #ffcc00;
+  color: #333;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+  width: 500px; 
+  margin-left: auto;
+  margin-right: auto; 
 }
 
 @keyframes fade-right {
