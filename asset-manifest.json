@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/VEP_vehicle_emission_predictor/static/css/main.b659347d.css",
+    "main.js": "/VEP_vehicle_emission_predictor/static/js/main.d5a3ecc9.js",
+    "static/media/carPic4.png": "/VEP_vehicle_emission_predictor/static/media/carPic4.cb8224ed18e4e77f3bb6.png",
+    "static/media/vep logo.png": "/VEP_vehicle_emission_predictor/static/media/vep logo.bf5b1ef635dc8f050a61.png",
+    "index.html": "/VEP_vehicle_emission_predictor/index.html",
+    "main.b659347d.css.map": "/VEP_vehicle_emission_predictor/static/css/main.b659347d.css.map",
+    "main.d5a3ecc9.js.map": "/VEP_vehicle_emission_predictor/static/js/main.d5a3ecc9.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b659347d.css",
+    "static/js/main.d5a3ecc9.js"
+  ]
+}
