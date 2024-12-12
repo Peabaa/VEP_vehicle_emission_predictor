@@ -147,7 +147,7 @@ const VEP = () => {
     let predictedMileage = calculateViolationMileage(dataPoints, emissionLimit);
   
     // Reliability Threshold
-    const maxExtrapolationFactor = 2;
+    const maxExtrapolationFactor = 20;
     const maxAllowedMileage = dataPoints[dataPoints.length - 1].mileage * maxExtrapolationFactor;
   
     if (predictedMileage === -1 || predictedMileage < 0 || predictedMileage > maxAllowedMileage) {
